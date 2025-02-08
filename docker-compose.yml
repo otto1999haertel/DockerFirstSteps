@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+  # Flask-App Service
+  web:
+    build: .
+    ports:
+      - "6969:6969"  # Exponiere den Port 5000 des Containers auf Port 5000 des Hosts
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/kex  # Verbindungsstring zur PostgreSQL-Datenbank
+    depends_on:
+      - db  # Stellt sicher, dass der DB-Container vor dem Web-Container startet
+
+  # PostgreSQL Service
+  db:
+    image: postgres:16.1-alpine3.19  # Das PostgreSQL-Image
+    restart: always
+    environment:
+      POSTGRES_USER: postgres  # Der Benutzername für PostgreSQL
+      POSTGRES_PASSWORD: password  # Das Passwort für PostgreSQL
+      POSTGRES_DB: kex  # Der Name der zu erstellenden Datenbank
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persistente Speicherung der Datenbankdaten
+    ports:
+      - "5432:5432"  # Exponiere den PostgreSQL-Port für die Verbindung
+
+# Persistente Speicherung der PostgreSQL-Datenbank
+volumes:
+  postgres_data:
