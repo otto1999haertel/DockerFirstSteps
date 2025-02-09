@@ -1,15 +1,6 @@
 version: '3.7'
 
 services:
-  # Flask-App Service
-  web:
-    build: .
-    ports:
-      - "6969:6969"  # Exponiere den Port 6969 des Containers auf Port 6969 des Hosts
-    environment:
-      - DATABASE_URL=postgres://postgres:password@db:5432/db-1 # Verbindungsstring zur PostgreSQL-Datenbank
-    depends_on:
-      - db  # Stellt sicher, dass der DB-Container vor dem Web-Container startet
 
   # PostgreSQL Service
   db:
@@ -24,6 +15,38 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # SQL-Skript einbinden
     ports:
       - "5432:5432"  # Exponiere den PostgreSQL-Port für die Verbindung
+
+  backend:
+    build: backend/
+    ports:
+         - "6969:6969"  # Exponiere den Port 6969 des Containers auf Port 6969 des Hosts
+    environment:
+      - DATABASE_URL=postgres://postgres:password@db:5432/db-1 # Verbindungsstring zur PostgreSQL-Datenbank
+    depends_on:
+      - db  # Stellt sicher, dass der DB-Container vor dem Web-Container startet
+
+      
+  frontend:
+    build: frontend/ #baut Dockerfile im den Ordner
+    ports:
+      - "8502:8502"  # Exponiere den Port 8502 des Containers auf Port 8502 des Hosts
+    depends_on:
+      - backend
+    #environment:
+      #- DATABASE_URL=postgres://postgres:password@db:5432/db-1 # Verbindungsstring zur PostgreSQL-Datenbank
+    #depends_on:
+    #  - db  # Stellt sicher, dass der DB-Container vor dem Web-Container startet
+  # Flask-App Service
+
+  # web:
+  #   build: .
+  #   ports:
+  #     - "6969:6969"  # Exponiere den Port 6969 des Containers auf Port 6969 des Hosts
+  #   environment:
+  #     - DATABASE_URL=postgres://postgres:password@db:5432/db-1 # Verbindungsstring zur PostgreSQL-Datenbank
+  #   depends_on:
+  #     - db  # Stellt sicher, dass der DB-Container vor dem Web-Container startet
+
 
 # Persistente Speicherung der PostgreSQL-Datenbank
 volumes:
