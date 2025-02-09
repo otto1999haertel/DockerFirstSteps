@@ -5,9 +5,9 @@ services:
   web:
     build: .
     ports:
-      - "6969:6969"  # Exponiere den Port 5000 des Containers auf Port 5000 des Hosts
+      - "6969:6969"  # Exponiere den Port 6969 des Containers auf Port 6969 des Hosts
     environment:
-      - DATABASE_URL=postgres://postgres:password@db:5432/kex  # Verbindungsstring zur PostgreSQL-Datenbank
+      - DATABASE_URL=postgres://postgres:password@db:5432/db-1 # Verbindungsstring zur PostgreSQL-Datenbank
     depends_on:
       - db  # Stellt sicher, dass der DB-Container vor dem Web-Container startet
 
@@ -18,9 +18,10 @@ services:
     environment:
       POSTGRES_USER: postgres  # Der Benutzername für PostgreSQL
       POSTGRES_PASSWORD: password  # Das Passwort für PostgreSQL
-      POSTGRES_DB: kex  # Der Name der zu erstellenden Datenbank
+      POSTGRES_DB: db-1  # Der Name der zu erstellenden Datenbank
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Persistente Speicherung der Datenbankdaten
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql  # SQL-Skript einbinden
     ports:
       - "5432:5432"  # Exponiere den PostgreSQL-Port für die Verbindung
 
