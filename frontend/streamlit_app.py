@@ -16,15 +16,9 @@ logging.debug(response)
 # Direkt auf die JSON-Daten zugreifen
 user_data = response.json()  # Hier wird der JSON-Inhalt direkt extrahiert
 
-st.write(user_data)
+#st.write(user_data)
 logging.debug(user_data)
 logging.debug("####################")
-
-# Falls der JSON-Inhalt ein weiteres "data"-Feld enthält
-user_data = user_data[0] # Falls du nur das "data"-Feld brauchst
-logging.debug(user_data)
-st.session_state.user_data = pd.DataFrame(data=user_data)
-
 
 
 # make user data pandas df
@@ -45,9 +39,34 @@ if st.button("Absenden"):
              "Content-Type": "application/json"
         }
         requests.post("http://172.19.0.3:6969/write_data", data=data,headers=headers)
+        # Nach dem Absenden die neueste Benutzerdaten vom Server abrufen
+        response = requests.get("http://172.19.0.3:6969/get_data")
+        if response.status_code == 200:
+            user_data = response.json()  # JSON-Daten vom Server extrahieren
+            # Umwandlung in DataFrame und in Session State speichern
+            st.session_state.user_data = pd.DataFrame(user_data, columns=["ID", "Name", "Username"])
+        else:
+            st.warning("Fehler beim Abrufen der Benutzerdaten vom Server.")
     else:
         st.warning("Bitte sowohl Name als auch Benutzername eingeben.")
 
 # Tabelle mit allen Benutzerdaten anzeigen
-st.write("### Benutzerliste")
-st.dataframe(st.session_state.user_data)
+
+# Umwandlung in DataFrame mit benannten Spalten
+df = pd.DataFrame(user_data, columns=["ID", "Name", "Username"])
+
+# Daten im Session State speichern
+st.session_state.user_data = df
+
+# Styling für die Spaltenbreiten
+styled_df = df.style.set_properties(
+    **{
+        "ID": "width: 5px; min-width: 5px;",  # ID-Spalte klein halten
+        "Name": "width: 30%;",  # Name-Spalte auf 30% der Breite
+        "Username": "width: 65%;"  # Username-Spalte auf 65% der Breite
+    }
+)
+
+# Streamlit-Tabelle anzeigen
+st.title("Benutzerliste")
+st.dataframe(styled_df, use_container_width=True, hide_index=True)
